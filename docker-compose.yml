@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  manager:
+    build: .
+    ports:
+      - "8014:5000"  # Flask служит и static, и API
+    volumes:
+      - .:/app:ro  # Код (опционально)
+      - /var/run/docker.sock:/var/run/docker.sock  # Доступ к хост-Docker
+    environment:
+      - PORT=5000
+    restart: unless-stopped

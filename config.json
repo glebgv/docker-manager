@@ -1,0 +1,8 @@
+{
+  "apiUrl": "/api",
+  "refreshInterval": 0,
+  "maxContainers": 100,
+  "theme": "dark",
+  "language": "en",
+  "autoConnect": true
+}

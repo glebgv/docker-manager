@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Manager Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #60a5fa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto Mono', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f35 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        /* Spinner for loading */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Stats */
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 12px 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Status Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            gap: 6px;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--info);
+        }
+
+        /* Status Indicator */
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-running {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-exited {
+            background: var(--danger);
+        }
+
+        .status-paused {
+            background: var(--warning);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Container List */
+        .container-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .container-item:hover {
+            background: var(--bg-secondary);
+            transform: translateX(4px);
+        }
+
+        .container-info {
+            flex: 1;
+        }
+
+        .container-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .container-id {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+        }
+
+        .container-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Input */
+        input, select, textarea {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        /* Logs Modal Specific Styles */
+        .logs-modal .modal-content {
+            max-width: 900px;
+            width: 95%;
+        }
+
+        .logs-container {
+            background: #0d1117;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.5;
+            border: 1px solid var(--border);
+        }
+
+        .log-line {
+            padding: 2px 0;
+            white-space: pre-wrap;
+        }
+
+        .log-timestamp {
+            color: #8b949e;
+            margin-right: 8px;
+        }
+
+        .log-info { color: var(--success); }
+        .log-warn, .log-warning { color: var(--warning); }
+        .log-error, .log-err { color: var(--danger); }
+        .log-debug { color: #7c3aed; }
+
+        mark.log-highlight {
+            background: #ffeb3b;
+            color: #000;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        mark.log-highlight-current {
+            background: #ff9800;
+            color: #000;
+        }
+
+        .logs-search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .logs-search-input {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .logs-search-counter {
+            color: var(--text-secondary);
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .logs-search-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* Confirmation Modal Styles */
+        .confirm-modal .modal-header {
+            color: var(--danger);
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--danger);
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            animation: slideIn 0.4s ease-out;
+            opacity: 1;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        .toast.info { border-left-color: var(--info); }
+        .toast.success { border-left-color: var(--success); }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🐳</div>
+                <span>Docker Manager Pro</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-primary" onclick="openModal('newContainer')">➕ New Container</button>
+                <button class="btn btn-secondary" onclick="refreshAll()">🔄 Refresh</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                📊 Dashboard
+            </button>
+            <button class="tab" data-tab="containers" onclick="switchTab('containers')">
+                📦 Containers
+            </button>
+            <button class="tab" data-tab="images" onclick="switchTab('images')">
+                🖼️ Images
+            </button>
+            <button class="tab" data-tab="networks" onclick="switchTab('networks')">
+                🌐 Networks
+            </button>
+            <button class="tab" data-tab="volumes" onclick="switchTab('volumes')">
+                💾 Volumes
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="grid grid-4">
+                <div class="card stat-card">
+                    <div class="stat-label">Running</div>
+                    <div class="stat-value" id="runningCount">0</div>
+                    <span class="badge badge-success">
+                        <span class="status-dot status-running"></span> Active
+                    </span>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Stopped</div>
+                    <div class="stat-value" id="stoppedCount">0</div>
+                    <span class="badge badge-danger">Inactive</span>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Total Images</div>
+                    <div class="stat-value" id="totalImages">0</div>
+                    <span class="badge badge-info">Available</span>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-label">Volumes</div>
+                    <div class="stat-value" id="totalVolumes">0</div>
+                    <span class="badge badge-info">Mounted</span>
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="margin-top: 30px;">
+                <div class="card">
+                    <div class="section-title">💻 Resource Usage</div>
+                    <canvas id="resourceChart" style="max-height: 300px;"></canvas>
+                </div>
+                <div class="card">
+                    <div class="section-title">📈 Container Status</div>
+                    <canvas id="statusChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 30px;">
+                <div class="section-title">🚀 Quick Actions</div>
+                <div class="grid grid-4" style="gap: 12px;">
+                    <button class="btn btn-primary" onclick="systemPrune()">🧹 Prune System</button>
+                    <button class="btn btn-warning" onclick="mockAction('Remove Dangling')">🗑️ Clean Dangling</button>
+                    <button class="btn btn-secondary" onclick="mockAction('Check Network')">🔍 Network Diagnostics</button>
+                    <button class="btn btn-secondary" onclick="backupVolumesInfo()">💾 Backup Volumes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Containers Tab -->
+        <div id="containers" class="tab-content" style="display: none;">
+            <div id="containersList" class="card"></div>
+        </div>
+
+        <!-- Images Tab -->
+        <div id="images" class="tab-content" style="display: none;">
+            <div id="imagesList" class="card"></div>
+        </div>
+
+        <!-- Networks Tab -->
+        <div id="networks" class="tab-content" style="display: none;">
+            <div id="networksList" class="card"></div>
+        </div>
+
+        <!-- Volumes Tab -->
+        <div id="volumes" class="tab-content" style="display: none;">
+            <div id="volumesList" class="card"></div>
+        </div>
+    </div>
+
+    <!-- Modal: New Container -->
+    <div class="modal" id="newContainer">
+        <div class="modal-content">
+            <div class="modal-header">Create New Container</div>
+            <div class="modal-body">
+                <div>
+                    <label>Image Name</label>
+                    <input type="text" id="imageName" placeholder="e.g., nginx:latest">
+                </div>
+                <div>
+                    <label>Container Name</label>
+                    <input type="text" id="containerName" placeholder="e.g., my-nginx">
+                </div>
+                <div>
+                    <label>Port Mapping</label>
+                    <input type="text" id="portMapping" placeholder="8080:80">
+                </div>
+                <div>
+                    <label>Environment Variables</label>
+                    <textarea id="envVars" placeholder="KEY=value&#10;KEY2=value2" rows="3"></textarea>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" id="autoStart"> Auto-start container
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('newContainer')">Cancel</button>
+                <button class="btn btn-primary" onclick="createContainer()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Pull Image -->
+    <div class="modal" id="pullImageModal">
+        <div class="modal-content">
+            <div class="modal-header">⬇️ Pull Image from Docker Hub</div>
+            <div class="modal-body">
+                <div>
+                    <label>Image Name</label>
+                    <input type="text" id="pullImageName" placeholder="nginx:latest или docker pull nginx:latest">
+                </div>
+                <div style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);">
+                    Можно ввести с префиксом "docker pull " или без. Поддерживаются теги и версии.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('pullImageModal')">Cancel</button>
+                <button class="btn btn-primary" id="pullButton" onclick="performPull()">
+                    <span id="pullButtonText">Pull Image</span>
+                    <span id="pullSpinner" class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Details -->
+    <div class="modal" id="containerDetails">
+        <div class="modal-content">
+            <div class="modal-header" id="detailsTitle">Details</div>
+            <div class="modal-body" id="detailsBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteBtn" style="display: inline-flex;">Delete</button>
+                <button class="btn btn-warning" id="toggleBtn" style="display: inline-flex;">Stop</button>
+                <button class="btn btn-secondary" onclick="closeModal('containerDetails')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Logs Viewer with Search -->
+    <div class="modal logs-modal" id="logsModal">
+        <div class="modal-content">
+            <div class="modal-header">Container Logs</div>
+            <div class="modal-body">
+                <div class="logs-search-bar">
+                    <input type="text" class="logs-search-input" id="logsSearchInput" placeholder="Поиск в логах..." oninput="searchInLogs()">
+                    <div class="logs-search-counter" id="logsSearchCounter">Найдено: 0</div>
+                    <div class="logs-search-nav">
+                        <button class="btn btn-sm btn-secondary" onclick="prevLogMatch()">↑ Предыдущий</button>
+                        <button class="btn btn-sm btn-secondary" onclick="nextLogMatch()">↓ Следующий</button>
+                    </div>
+                </div>
+                <div class="logs-container" id="logsContent">Loading...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('logsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Delete Confirmation -->
+    <div class="modal confirm-modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">⚠️ Confirm Action</div>
+            <div class="modal-body">
+                <div class="confirm-message" id="confirmMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
+                <button class="btn btn-danger" id="confirmYes">
+                    <span id="confirmYesText">Confirm</span>
+                    <span id="confirmSpinner" class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let config = {};
+        let charts = {};
+        let selectedContainer = null;
+        let pendingAction = null;
+
+        let currentLogsText = '';
+        let logMatches = [];
+        let currentMatchIndex = -1;
+
+        // Для алертов
+        let previousContainers = new Map();
+        let alertInterval = null;
+
+        // Load Config
+        async function loadConfig() {
+            try {
+                const response = await fetch('config.json');
+                if (!response.ok) throw new Error('Config load failed');
+                config = await response.json();
+                console.log('Config loaded:', config);
+            } catch (error) {
+                console.error('Failed to load config:', error);
+                config = {
+                    apiUrl: '/api',
+                    refreshInterval: 0,
+                    maxContainers: 100,
+                    theme: 'dark',
+                    language: 'en',
+                    autoConnect: true
+                };
+            }
+        }
+
+        // Toast функция
+        function showToast(message, type = 'error', duration = 6000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                error: '🚨',
+                warning: '⚠️',
+                success: '✅',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || '🚨'}</div>
+                <div class="toast-message">${message}</div>
+                <div class="toast-close" onclick="this.parentElement.style.opacity='0'; setTimeout(() => this.parentElement.remove(), 600);">✕</div>
+            `;
+
+            container.prepend(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 600);
+                }, duration);
+            }
+        }
+
+        // Проверка проблем с контейнерами
+        async function checkForContainerAlerts() {
+            try {
+                const response = await fetch(`${config.apiUrl}/containers`);
+                if (!response.ok) return;
+                const currentContainers = await response.json();
+
+                const currentMap = new Map();
+                currentContainers.forEach(c => currentMap.set(c.id, c));
+
+                for (const [id, current] of currentMap) {
+                    const prev = previousContainers.get(id);
+
+                    if (!prev) continue;
+
+                    if (prev.status === 'running' && current.status === 'exited' && current.state.ExitCode !== 0) {
+                        showToast(`Контейнер <strong>${current.name}</strong> упал с кодом ${current.state.ExitCode}`, 'error');
+                    }
+
+                    if (current.state.OOMKilled && !prev.state.OOMKilled) {
+                        showToast(`Контейнер <strong>${current.name}</strong> убит из-за нехватки памяти (OOM)`, 'error');
+                    }
+
+                    if (current.state.RestartCount > prev.state.RestartCount) {
+                        const diff = current.state.RestartCount - prev.state.RestartCount;
+                        if (diff > 2) {
+                            showToast(`Контейнер <strong>${current.name}</strong> часто рестартуется (${diff} раз)`, 'warning');
+                        }
+                    }
+
+                    if (prev.status === 'running' && ['exited', 'dead', 'paused'].includes(current.status)) {
+                        showToast(`Контейнер <strong>${current.name}</strong> неожиданно остановлен (${current.status})`, 'warning');
+                    }
+
+                    if (current.status === 'restarting') {
+                        showToast(`Контейнер <strong>${current.name}</strong> перезапускается`, 'info');
+                    }
+                }
+
+                previousContainers = currentMap;
+            } catch (error) {
+                console.error('Ошибка проверки алертов:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadConfig();
+            renderDashboard();
+            renderContainers();
+            renderImages();
+            renderNetworks();
+            renderVolumes();
+
+            checkForContainerAlerts();
+            alertInterval = setInterval(checkForContainerAlerts, 15000);
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName).style.display = 'block';
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            if (tabName === 'dashboard') {
+                setTimeout(() => renderCharts(), 100);
+            }
+        }
+
+        // Dashboard
+        async function renderDashboard() {
+            const runningCountEl = document.getElementById('runningCount');
+            const stoppedCountEl = document.getElementById('stoppedCount');
+            const totalImagesEl = document.getElementById('totalImages');
+            const totalVolumesEl = document.getElementById('totalVolumes');
+
+            runningCountEl.textContent = 'Loading...';
+            try {
+                const response = await fetch(`${config.apiUrl}/system/info`);
+                if (!response.ok) throw new Error('API error');
+                const info = await response.json();
+                if (info.status === 'error') throw new Error(info.message);
+
+                runningCountEl.textContent = info.containers_running || 0;
+                stoppedCountEl.textContent = info.containers_stopped || 0;
+                totalImagesEl.textContent = info.images || 0;
+                const volumesRes = await fetch(`${config.apiUrl}/volumes`);
+                const volumes = await volumesRes.json();
+                totalVolumesEl.textContent = volumes.length || 0;
+
+                renderCharts();
+            } catch (error) {
+                runningCountEl.textContent = 'Error';
+                console.error('Dashboard error:', error);
+            }
+        }
+
+        async function renderCharts() {
+            try {
+                const containersRes = await fetch(`${config.apiUrl}/containers`);
+                const containers = await containersRes.json();
+
+                const running = containers.filter(c => c.status === 'running').length;
+                const stopped = containers.length - running;
+
+                const resourceCtx = document.getElementById('resourceChart');
+                if (charts.resource) charts.resource.destroy();
+                charts.resource = new Chart(resourceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: containers.map(c => c.name),
+                        datasets: [
+                            {
+                                label: 'CPU %',
+                                data: containers.map(c => c.cpu_percent || 0),
+                                backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                            },
+                            {
+                                label: 'Memory MB',
+                                data: containers.map(c => c.memory_mb || 0),
+                                backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            }
+                        ]
+                    },
+                    options: { responsive: true }
+                });
+
+                const statusCtx = document.getElementById('statusChart');
+                if (charts.status) charts.status.destroy();
+                charts.status = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Running', 'Stopped'],
+                        datasets: [{
+                            data: [running, stopped],
+                            backgroundColor: ['#10b981', '#ef4444']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            } catch (error) {
+                console.error('Charts error:', error);
+            }
+        }
+
+        // Containers
+        async function renderContainers() {
+            const list = document.getElementById('containersList');
+            list.innerHTML = '<div class="section-title">📦 Containers</div><div>Loading...</div>';
+            try {
+                const response = await fetch(`${config.apiUrl}/containers`);
+                if (!response.ok) throw new Error('API error: ' + response.status);
+                const containers = await response.json();
+                if (containers.error) throw new Error(containers.error);
+
+                list.innerHTML = '<div class="section-title">📦 Containers</div>' +
+                    (containers.length === 0 ? '<div class="empty-state">No containers found</div>' :
+                    containers.map(c => `
+                        <div class="container-item" onclick="showContainerDetails('${c.id}')">
+                            <div class="container-info">
+                                <div class="container-name">${c.name}</div>
+                                <div class="container-id">ID: ${c.id}</div>
+                                <div class="container-meta">
+                                    <span class="meta-item">📦 ${c.image}</span>
+                                    <span class="meta-item">🔌 ${Object.entries(c.ports).map(([key, val]) => `${val ? val[0]?.HostPort : ''}:${key}`).join(', ')}</span>
+                                    <span class="meta-item">📅 ${new Date(c.created).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge ${c.status === 'running' ? 'badge-success' : (c.status === 'paused' ? 'badge-warning' : 'badge-danger')}">
+                                    <span class="status-dot ${c.status === 'running' ? 'status-running' : (c.status === 'paused' ? 'status-paused' : 'status-exited')}"></span>
+                                    ${c.status.toUpperCase()}
+                                </span>
+                                <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: flex-end;">
+                                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); viewLogs('${c.id}')">📋 Logs</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); toggleContainer('${c.id}', '${c.status}')">${c.status === 'running' ? '⏹️ Stop' : '▶️ Start'}</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join(''));
+            } catch (error) {
+                list.innerHTML = '<div class="section-title">📦 Containers</div><div class="error">Error loading containers: ' + error.message + '</div>';
+            }
+        }
+
+        // Images
+        async function renderImages() {
+            const list = document.getElementById('imagesList');
+            list.innerHTML = `
+                <div class="section-title">🖼️ Images</div>
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="openModal('pullImageModal')">⬇️ Pull New Image</button>
+                </div>
+                <div>Loading...</div>
+            `;
+            try {
+                const response = await fetch(`${config.apiUrl}/images`);
+                if (!response.ok) throw new Error('API error');
+                const images = await response.json();
+
+                list.innerHTML = `
+                    <div class="section-title">🖼️ Images</div>
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="openModal('pullImageModal')">⬇️ Pull New Image</button>
+                    </div>
+                ` + images.map(img => `
+                    <div class="container-item">
+                        <div class="container-info">
+                            <div class="container-name">${img.tags.join(', ') || '<none>'}</div>
+                            <div class="container-meta">
+                                <span class="meta-item">💾 ${Math.round(img.size)} MB</span>
+                                <span class="meta-item">ID: ${img.id}</span>
+                                <span class="meta-item">📅 ${new Date(img.created).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right; display: flex; gap: 8px;">
+                            <button class="btn btn-danger" onclick="confirmDeleteImage('${img.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                list.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function confirmDeleteImage(id) {
+            document.getElementById('confirmMessage').innerHTML = `
+                Вы уверены, что хотите удалить образ?<br><br>
+                Это действие необратимо и может повлиять на контейнеры, использующие этот образ!
+            `;
+            pendingAction = () => performDeleteImage(id);
+            openModal('confirmModal');
+
+            document.getElementById('confirmCancel').onclick = () => closeModal('confirmModal');
+            document.getElementById('confirmYes').onclick = () => {
+                pendingAction();
+            };
+        }
+
+        async function performDeleteImage(id) {
+            const button = document.getElementById('confirmYes');
+            const text = document.getElementById('confirmYesText');
+            const spinner = document.getElementById('confirmSpinner');
+            button.disabled = true;
+            text.textContent = 'Deleting...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`${config.apiUrl}/images/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Delete failed');
+                }
+                showToast('Образ успешно удалён', 'success');
+                closeModal('confirmModal');
+                renderImages();
+            } catch (error) {
+                showToast('Ошибка удаления образа: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                text.textContent = 'Confirm';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Networks
+        async function renderNetworks() {
+            const list = document.getElementById('networksList');
+            list.innerHTML = '<div class="section-title">🌐 Networks</div><div>Loading...</div>';
+            try {
+                const response = await fetch(`${config.apiUrl}/networks`);
+                if (!response.ok) throw new Error('API error');
+                const networks = await response.json();
+
+                list.innerHTML = '<div class="section-title">🌐 Networks</div>' +
+                    networks.map(net => `
+                        <div class="container-item">
+                            <div class="container-info">
+                                <div class="container-name">${net.name}</div>
+                                <div class="container-meta">
+                                    <span class="meta-item">🔗 ${net.driver}</span>
+                                    <span class="meta-item">📦 ${net.containers} containers</span>
+                                    <span class="meta-item">📅 ${new Date(net.created).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); inspectNetwork('${net.id}')">🔍 Inspect</button>
+                            </div>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                list.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function inspectNetwork(networkId) {
+            try {
+                const response = await fetch(`${config.apiUrl}/networks/${networkId}`);
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'API error');
+                }
+                const network = await response.json();
+
+                document.getElementById('detailsTitle').textContent = `Network: ${network.name}`;
+                document.getElementById('detailsBody').innerHTML = `
+                    <div>
+                        <label>Name</label>
+                        <input type="text" value="${network.name}" readonly>
+                    </div>
+                    <div>
+                        <label>Driver</label>
+                        <input type="text" value="${network.driver}" readonly>
+                    </div>
+                    <div>
+                        <label>Created</label>
+                        <input type="text" value="${new Date(network.created).toLocaleString()}" readonly>
+                    </div>
+                    <div>
+                        <label>Containers</label>
+                        <pre>${network.containers.length > 0 ? network.containers.join('\n') : 'None'}</pre>
+                    </div>
+                `;
+
+                document.getElementById('deleteBtn').style.display = 'none';
+                document.getElementById('toggleBtn').style.display = 'none';
+
+                openModal('containerDetails');
+            } catch (error) {
+                showToast('Ошибка просмотра сети: ' + error.message, 'error');
+            }
+        }
+
+        // Volumes
+        async function renderVolumes() {
+            const list = document.getElementById('volumesList');
+            list.innerHTML = '<div class="section-title">💾 Volumes</div><div>Loading...</div>';
+            try {
+                const response = await fetch(`${config.apiUrl}/volumes`);
+                if (!response.ok) throw new Error('API error');
+                const volumes = await response.json();
+
+                list.innerHTML = '<div class="section-title">💾 Volumes</div>' +
+                    (volumes.length === 0 ? '<div class="empty-state">Томы не найдены</div>' :
+                    volumes.map(vol => `
+                        <div class="container-item">
+                            <div class="container-info">
+                                <div class="container-name">${vol.name}</div>
+                                <div class="container-meta">
+                                    <span class="meta-item">🔗 ${vol.driver}</span>
+                                    <span class="meta-item">📅 ${new Date(vol.created).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right; display: flex; gap: 8px;">
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); inspectVolume('${vol.name}')">🔍 Inspect</button>
+                                <button class="btn btn-danger" onclick="event.stopPropagation(); confirmDeleteVolume('${vol.name}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `).join(''));
+            } catch (error) {
+                list.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function backupVolumesInfo() {
+            showToast(`
+                <strong>Бэкап томов</strong><br><br>
+                Для бэкапа тома используйте команду в терминале:<br><br>
+                <code>docker run --rm -v <strong>volume_name</strong>:/from -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz -C /from .</code><br><br>
+                Архив появится в текущей директории.<br>
+                Автоматический бэкап в веб-интерфейсе в разработке.
+            `, 'info', 15000);
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const toggleBtn = document.getElementById('toggleBtn');
+            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+            if (toggleBtn) toggleBtn.style.display = 'inline-flex';
+        }
+
+        async function showContainerDetails(id) {
+            try {
+                const response = await fetch(`${config.apiUrl}/containers/${id}`);
+                if (!response.ok) throw new Error('API error');
+                selectedContainer = await response.json();
+
+                document.getElementById('detailsTitle').textContent = `${selectedContainer.name} - Details`;
+                document.getElementById('detailsBody').innerHTML = `
+                    <div>
+                        <label>Container ID</label>
+                        <input type="text" value="${selectedContainer.id}" readonly>
+                    </div>
+                    <div>
+                        <label>Image</label>
+                        <input type="text" value="${selectedContainer.image}" readonly>
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <input type="text" value="${selectedContainer.status.toUpperCase()}" readonly>
+                    </div>
+                    <div>
+                        <label>Ports</label>
+                        <input type="text" value="${Object.entries(selectedContainer.ports).map(([key, val]) => `${val ? val[0]?.HostPort : ''}:${key}`).join(', ')}" readonly>
+                    </div>
+                    <div>
+                        <label>Recent Logs</label>
+                        <div class="logs-container" id="detailsLogs">Loading...</div>
+                    </div>
+                `;
+
+                const logsRes = await fetch(`${config.apiUrl}/containers/${id}/logs?lines=50`);
+                const logsData = await logsRes.json();
+                document.getElementById('detailsLogs').innerHTML = formatLogs(logsData.logs);
+
+                const toggleBtn = document.getElementById('toggleBtn');
+                toggleBtn.textContent = selectedContainer.status === 'running' ? '⏹️ Stop' : '▶️ Start';
+                toggleBtn.onclick = () => toggleContainer(selectedContainer.id, selectedContainer.status);
+
+                document.getElementById('deleteBtn').onclick = () => confirmDeleteContainer(selectedContainer.id);
+
+                openModal('containerDetails');
+            } catch (error) {
+                showToast('Error loading details: ' + error.message, 'error');
+            }
+        }
+
+        async function inspectVolume(volumeName) {
+            try {
+                const response = await fetch(`${config.apiUrl}/volumes/${volumeName}`);
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'API error');
+                }
+                const volume = await response.json();
+
+                document.getElementById('detailsTitle').textContent = `Volume: ${volume.name}`;
+                document.getElementById('detailsBody').innerHTML = `
+                    <div>
+                        <label>Name</label>
+                        <input type="text" value="${volume.name}" readonly>
+                    </div>
+                    <div>
+                        <label>Driver</label>
+                        <input type="text" value="${volume.driver}" readonly>
+                    </div>
+                    <div>
+                        <label>Mountpoint</label>
+                        <input type="text" value="${volume.mountpoint}" readonly>
+                    </div>
+                    <div>
+                        <label>Created</label>
+                        <input type="text" value="${new Date(volume.created).toLocaleString()}" readonly>
+                    </div>
+                    <div>
+                        <label>Labels</label>
+                        <pre>${JSON.stringify(volume.labels || {}, null, 2) || 'None'}</pre>
+                    </div>
+                `;
+
+                document.getElementById('deleteBtn').style.display = 'none';
+                document.getElementById('toggleBtn').style.display = 'none';
+
+                openModal('containerDetails');
+            } catch (error) {
+                showToast('Ошибка просмотра тома: ' + error.message, 'error');
+            }
+        }
+
+        function confirmDeleteVolume(volumeName) {
+            document.getElementById('confirmMessage').innerHTML = `
+                Вы уверены, что хотите удалить том "<strong>${volumeName}</strong>"?<br><br>
+                Это действие необратимо и может повлиять на контейнеры, использующие этот том!
+            `;
+            pendingAction = () => performDeleteVolume(volumeName);
+            openModal('confirmModal');
+
+            document.getElementById('confirmCancel').onclick = () => closeModal('confirmModal');
+            document.getElementById('confirmYes').onclick = () => {
+                pendingAction();
+            };
+        }
+
+        async function performDeleteVolume(volumeName) {
+            const button = document.getElementById('confirmYes');
+            const text = document.getElementById('confirmYesText');
+            const spinner = document.getElementById('confirmSpinner');
+            button.disabled = true;
+            text.textContent = 'Deleting...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`${config.apiUrl}/volumes/${volumeName}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Delete failed');
+                }
+                showToast(`Том "${volumeName}" успешно удалён`, 'success');
+                closeModal('confirmModal');
+                renderVolumes();
+            } catch (error) {
+                showToast('Ошибка удаления тома: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                text.textContent = 'Confirm';
+                spinner.style.display = 'none';
+            }
+        }
+
+        function confirmDeleteContainer(id) {
+            document.getElementById('confirmMessage').innerHTML = `
+                Вы уверены, что хотите удалить контейнер?<br><br>
+                Это действие необратимо!
+            `;
+            pendingAction = () => performDeleteContainer(id);
+            openModal('confirmModal');
+
+            document.getElementById('confirmCancel').onclick = () => closeModal('confirmModal');
+            document.getElementById('confirmYes').onclick = () => {
+                pendingAction();
+            };
+        }
+
+        async function performDeleteContainer(id) {
+            const button = document.getElementById('confirmYes');
+            const text = document.getElementById('confirmYesText');
+            const spinner = document.getElementById('confirmSpinner');
+            button.disabled = true;
+            text.textContent = 'Deleting...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`${config.apiUrl}/containers/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Delete failed');
+                showToast('Контейнер успешно удалён', 'success');
+                closeModal('confirmModal');
+                closeModal('containerDetails');
+                refreshAll();
+            } catch (error) {
+                showToast('Ошибка удаления контейнера: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                text.textContent = 'Confirm';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Просмотр логов с поиском
+        async function viewLogs(id) {
+            try {
+                const response = await fetch(`${config.apiUrl}/containers/${id}/logs?lines=500`);
+                if (!response.ok) throw new Error('Logs failed');
+                const data = await response.json();
+
+                currentLogsText = data.logs;
+                document.getElementById('logsContent').innerHTML = formatLogs(currentLogsText);
+                document.getElementById('logsSearchInput').value = '';
+                document.getElementById('logsSearchCounter').textContent = 'Найдено: 0';
+                logMatches = [];
+                currentMatchIndex = -1;
+
+                openModal('logsModal');
+            } catch (error) {
+                showToast('Error loading logs: ' + error.message, 'error');
+            }
+        }
+
+        function searchInLogs() {
+            const query = document.getElementById('logsSearchInput').value.trim();
+            const logsContent = document.getElementById('logsContent');
+            const counterEl = document.getElementById('logsSearchCounter');
+
+            if (!query) {
+                logsContent.innerHTML = formatLogs(currentLogsText);
+                counterEl.textContent = 'Найдено: 0';
+                logMatches = [];
+                currentMatchIndex = -1;
+                return;
+            }
+
+            const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+            const highlighted = currentLogsText.replace(regex, '<mark class="log-highlight">$1</mark>');
+
+            logsContent.innerHTML = formatLogs(highlighted);
+
+            logMatches = Array.from(logsContent.querySelectorAll('mark.log-highlight'));
+
+            counterEl.textContent = `Найдено: ${logMatches.length}`;
+            currentMatchIndex = logMatches.length > 0 ? 0 : -1;
+            highlightCurrentMatch();
+        }
+
+        function highlightCurrentMatch() {
+            document.querySelectorAll('mark.log-highlight-current').forEach(m => m.classList.remove('log-highlight-current'));
+
+            if (currentMatchIndex >= 0 && logMatches[currentMatchIndex]) {
+                logMatches[currentMatchIndex].classList.add('log-highlight-current');
+                logMatches[currentMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function nextLogMatch() {
+            if (logMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex + 1) % logMatches.length;
+            highlightCurrentMatch();
+        }
+
+        function prevLogMatch() {
+            if (logMatches.length === 0) return;
+            currentMatchIndex = currentMatchIndex <= 0 ? logMatches.length - 1 : currentMatchIndex - 1;
+            highlightCurrentMatch();
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function formatLogs(logsText) {
+            return logsText.split('\n').map(line => {
+                if (!line) return '<div class="log-line"></div>';
+                let className = '';
+                const upperLine = line.toUpperCase();
+                if (upperLine.includes('INFO')) className = 'log-info';
+                else if (upperLine.includes('WARN') || upperLine.includes('WARNING')) className = 'log-warn';
+                else if (upperLine.includes('ERROR') || upperLine.includes('ERR')) className = 'log-error';
+                else if (upperLine.includes('DEBUG')) className = 'log-debug';
+
+                const parts = line.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)?\s*(.*)$/);
+                const timestamp = parts && parts[1] ? `<span class="log-timestamp">${parts[1]}</span>` : '';
+                const message = parts ? parts[2] : line;
+
+                return `<div class="log-line ${className}">${timestamp}${message}</div>`;
+            }).join('');
+        }
+
+        async function createContainer() {
+            const image = document.getElementById('imageName').value.trim();
+            const name = document.getElementById('containerName').value.trim();
+            const portMapping = document.getElementById('portMapping').value.trim();
+            const envVars = document.getElementById('envVars').value.split('\n').map(l => l.trim()).filter(l => l);
+
+            if (!image || !name) {
+                showToast('Имя образа и имя контейнера обязательны', 'error');
+                return;
+            }
+
+            const ports = [];
+            if (portMapping) {
+                const parts = portMapping.split(':');
+                if (parts.length === 2) {
+                    ports.push({host_port: parts[0].trim(), container_port: parts[1].trim()});
+                }
+            }
+
+            try {
+                const response = await fetch(`${config.apiUrl}/containers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image, name, ports, env: envVars })
+                });
+                if (!response.ok) throw new Error('Create failed');
+                const data = await response.json();
+
+                if (document.getElementById('autoStart').checked) {
+                    await fetch(`${config.apiUrl}/containers/${data.id}/start`, { method: 'POST' });
+                }
+
+                showToast('Контейнер успешно создан', 'success');
+                closeModal('newContainer');
+                refreshAll();
+            } catch (error) {
+                showToast('Ошибка создания контейнера: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleContainer(id, status) {
+            const action = status === 'running' ? 'stop' : 'start';
+            try {
+                const response = await fetch(`${config.apiUrl}/containers/${id}/${action}`, { method: 'POST' });
+                if (!response.ok) throw new Error('Action failed');
+                showToast(`Контейнер ${action === 'stop' ? 'остановлен' : 'запущен'}`, 'success');
+                closeModal('containerDetails');
+                refreshAll();
+            } catch (error) {
+                showToast('Ошибка: ' + error.message, 'error');
+            }
+        }
+
+        async function systemPrune() {
+            try {
+                const response = await fetch(`${config.apiUrl}/system/prune`, { method: 'POST' });
+                if (!response.ok) throw new Error('Prune failed');
+                const data = await response.json();
+                showToast(`Очистка завершена: удалено ${data.containers_deleted} контейнеров, освобождено ${data.space_reclaimed} байт`, 'success');
+                refreshAll();
+            } catch (error) {
+                showToast('Ошибка очистки: ' + error.message, 'error');
+            }
+        }
+
+        async function performPull() {
+            let rawInput = document.getElementById('pullImageName').value.trim();
+            if (!rawInput) {
+                showToast('Введите имя образа', 'error');
+                return;
+            }
+
+            if (rawInput.toLowerCase().startsWith('docker pull ')) {
+                rawInput = rawInput.substring(12).trim();
+            }
+
+            const imageName = rawInput;
+
+            const button = document.getElementById('pullButton');
+            const text = document.getElementById('pullButtonText');
+            const spinner = document.getElementById('pullSpinner');
+            button.disabled = true;
+            text.textContent = 'Pulling...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`${config.apiUrl}/images/pull`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageName })
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Pull failed');
+                }
+                showToast(`Образ "${imageName}" успешно загружен`, 'success');
+                closeModal('pullImageModal');
+                renderImages();
+            } catch (error) {
+                showToast('Ошибка загрузки образа: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                text.textContent = 'Pull Image';
+                spinner.style.display = 'none';
+            }
+        }
+
+        function mockAction(action) {
+            showToast(`${action}\n\nЭта функция в разработке.`, 'info');
+        }
+
+        function refreshAll() {
+            renderDashboard();
+            renderContainers();
+            renderImages();
+            renderNetworks();
+            renderVolumes();
+        }
+    </script>
+</body>
+</html>
